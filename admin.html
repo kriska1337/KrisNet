@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        dark: {
+                            800: '#1e293b',
+                            850: '#172033',
+                            900: '#0f172a',
+                            950: '#080f1a',
+                        }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .glass-effect {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+        
+        .status-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+        
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.2);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(56, 189, 248, 0.5);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(56, 189, 248, 0.7);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-dark-950 via-dark-900 to-dark-850 text-slate-300 min-h-screen">
+
+<!-- Login Screen -->
+<div id="login-screen" class="min-h-screen flex items-center justify-center p-4 bg-[url('https://images.unsplash.com/photo-1639322537228-f710d846310a?q=80&w=2000')] bg-cover bg-center">
+    <div class="w-full max-w-md glass-effect p-8 rounded-2xl shadow-2xl border border-slate-700/30">
+        <div class="flex justify-center mb-6">
+            <div class="h-20 w-20 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center shadow-lg">
+                <i class="fas fa-shield-alt text-white text-3xl"></i>
+            </div>
+        </div>
+        <h1 class="text-3xl font-bold text-white mb-2 text-center">Admin Access</h1>
+        <p class="text-slate-400 text-center mb-6">Enter your credentials to continue</p>
+        <form id="login-form" class="space-y-5">
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="fas fa-key text-slate-400"></i>
+                </div>
+                <input type="password" id="admin-key-input" 
+                    class="w-full pl-10 p-3.5 bg-dark-900/80 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 placeholder-slate-500 text-white" 
+                    placeholder="Enter your Admin Key" required>
+            </div>
+            <button type="submit" 
+                class="w-full p-3.5 bg-gradient-to-r from-primary-600 to-primary-500 text-white font-bold rounded-xl hover:from-primary-500 hover:to-primary-400 transition-all duration-300 shadow-lg shadow-primary-500/20">
+                <i class="fas fa-sign-in-alt mr-2"></i> Sign In
+            </button>
+            <div id="login-error" class="hidden">
+                <div class="bg-red-900/30 border border-red-700/50 text-red-400 p-3 rounded-lg text-center">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    Invalid Admin Key
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Admin Panel -->
+<div id="admin-panel" class="hidden transition-all duration-300">
+    <header class="glass-effect border-b border-slate-700/30 p-4 shadow-lg sticky top-0 z-10">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="h-10 w-10 rounded-lg bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center shadow-lg">
+                    <i class="fas fa-shield-alt text-white"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-white">Admin Dashboard</h1>
+            </div>
+            <button id="logout-button" class="px-4 py-2 bg-red-600/80 hover:bg-red-500 text-white font-semibold rounded-lg transition-colors flex items-center">
+                <i class="fas fa-sign-out-alt mr-2"></i> Logout
+            </button>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Launch Attack Card -->
+            <div class="bg-dark-900/70 border border-slate-700/30 p-6 rounded-xl shadow-xl card-hover">
+                <div class="flex items-center mb-4">
+                    <div class="h-10 w-10 rounded-lg bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center shadow-lg mr-3">
+                        <i class="fas fa-rocket text-white"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-white">Launch Attack</h2>
+                </div>
+                <div class="border-b border-slate-700/50 mb-4"></div>
+                <form id="attack-form" class="space-y-4">
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-key text-slate-500"></i>
+                        </div>
+                        <input type="text" id="api-key" class="w-full pl-10 p-3 bg-dark-850 border border-slate-700/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 placeholder-slate-500" placeholder="Your API Key" required>
+                    </div>
+                    
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-crosshairs text-slate-500"></i>
+                        </div>
+                        <input type="text" id="ip" class="w-full pl-10 p-3 bg-dark-850 border border-slate-700/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 placeholder-slate-500" placeholder="Target IP / URL" required>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-network-wired text-slate-500"></i>
+                            </div>
+                            <input type="number" id="port" class="w-full pl-10 p-3 bg-dark-850 border border-slate-700/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 placeholder-slate-500" placeholder="Port" required>
+                        </div>
+                        
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-clock text-slate-500"></i>
+                            </div>
+                            <input type="number" id="duration" class="w-full pl-10 p-3 bg-dark-850 border border-slate-700/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 placeholder-slate-500" placeholder="Duration (30-120s)" min="30" max="120" required>
+                        </div>
+                    </div>
+                    
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-code-branch text-slate-500"></i>
+                        </div>
+                        <select id="method" class="w-full pl-10 p-3 bg-dark-850 border border-slate-700/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 placeholder-slate-500 appearance-none" required>
+                            <option value="">-- Select Method --</option>
+                            <option value="udp">UDP</option>
+                            <option value="tcp">TCP</option>
+                            <option value="syn">SYN</option>
+                            <option value="http-flood">HTTP-FLOOD</option>
+                            <option value="synflood">SYNFLOOD</option>
+                            <option value="ack">ACK</option>
+                            <option value="ssh">SSH</option>
+                            <option value="hex">HEX</option>
+                            <option value="synack">SYNACK</option>
+                            <option value="psch">PSCH</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                            <i class="fas fa-chevron-down text-slate-500"></i>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="w-full p-3 bg-gradient-to-r from-primary-600 to-primary-500 text-white font-bold rounded-lg hover:from-primary-500 hover:to-primary-400 transition-all duration-300 shadow-lg shadow-primary-500/20 flex items-center justify-center">
+                        <i class="fas fa-rocket mr-2"></i> Launch Attack
+                    </button>
+                </form>
+            </div>
+
+            <!-- System Status Card -->
+            <div class="bg-dark-900/70 border border-slate-700/30 p-6 rounded-xl shadow-xl card-hover">
+                <div class="flex items-center mb-4">
+                    <div class="h-10 w-10 rounded-lg bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center shadow-lg mr-3">
+                        <i class="fas fa-chart-line text-white"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-white flex items-center">
+                        System Status
+                        <span id="status-light" class="ml-3 h-4 w-4 rounded-full bg-red-500 status-pulse"></span>
+                    </h2>
+                </div>
+                <div class="border-b border-slate-700/50 mb-4"></div>
+                
+                <div id="attack-status" class="text-sm space-y-2 mb-6">
+                    <div class="bg-dark-850 border border-slate-700/50 p-4 rounded-lg">
+                        <div class="flex items-center text-slate-400 mb-2">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            <span>Status Information</span>
+                        </div>
+                        <p class="text-slate-300">No active attacks.</p>
+                    </div>
+                </div>
+
+                <h3 class="text-lg font-bold text-white mb-4 flex items-center">
+                    <i class="fas fa-toggle-on mr-2 text-primary-400"></i>
+                    Attack System Control
+                </h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <button id="enable-attacks" class="py-3 px-4 bg-emerald-600/80 hover:bg-emerald-500 text-white font-semibold rounded-lg transition-colors flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fas fa-play mr-2"></i> Enable
+                    </button>
+                    <button id="disable-attacks" class="py-3 px-4 bg-red-600/80 hover:bg-red-500 text-white font-semibold rounded-lg transition-colors flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fas fa-stop mr-2"></i> Disable
+                    </button>
+                </div>
+            </div>
+
+            <!-- Connected Clients Card -->
+            <div class="bg-dark-900/70 border border-slate-700/30 p-6 rounded-xl shadow-xl card-hover">
+                <div class="flex items-center mb-4">
+                    <div class="h-10 w-10 rounded-lg bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center shadow-lg mr-3">
+                        <i class="fas fa-users text-white"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-white">Connected Clients
+                        <span id="client-count" class="ml-2 px-2 py-0.5 bg-primary-600 text-white text-sm rounded-full">0</span>
+                    </h2>
+                </div>
+                <div class="border-b border-slate-700/50 mb-4"></div>
+                
+                <div class="bg-dark-850 border border-slate-700/50 rounded-lg">
+                    <div class="flex items-center justify-between p-3 border-b border-slate-700/50">
+                        <div class="flex items-center text-slate-400">
+                            <i class="fas fa-terminal mr-2"></i>
+                            <span>Client Data</span>
+                        </div>
+                        <button id="refresh-clients" class="text-primary-400 hover:text-primary-300 transition-colors">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    <pre id="client-list" class="p-4 text-xs text-slate-300 h-64 overflow-y-auto font-mono">No clients connected.</pre>
+                </div>
+            </div>
+
+        </div>
+        
+        <!-- Activity Log Section -->
+        <div class="mt-6 bg-dark-900/70 border border-slate-700/30 p-6 rounded-xl shadow-xl card-hover">
+            <div class="flex items-center mb-4">
+                <div class="h-10 w-10 rounded-lg bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center shadow-lg mr-3">
+                    <i class="fas fa-history text-white"></i>
+                </div>
+                <h2 class="text-xl font-bold text-white">Activity Log</h2>
+            </div>
+            <div class="border-b border-slate-700/50 mb-4"></div>
+            
+            <div class="bg-dark-850 border border-slate-700/50 rounded-lg p-4 h-48 overflow-y-auto">
+                <div id="activity-log" class="space-y-2">
+                    <div class="flex items-start">
+                        <div class="min-w-[80px] text-xs text-slate-500">Just now</div>
+                        <div class="flex-1">
+                            <span class="text-primary-400">System</span>
+                            <span class="text-slate-300"> - Dashboard initialized</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-8 py-6 border-t border-slate-800">
+        <div class="container mx-auto px-6 text-center text-slate-500 text-sm">
+            <p>Admin Dashboard © 2025 - Secure System</p>
+        </div>
+    </footer>
+</div>
+
+<!-- Toast Notification System -->
+<div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-md"></div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const loginScreen = document.getElementById('login-screen');
+        const adminPanel = document.getElementById('admin-panel');
+        const loginForm = document.getElementById('login-form');
+        const adminKeyInput = document.getElementById('admin-key-input');
+        const loginError = document.getElementById('login-error');
+        const logoutButton = document.getElementById('logout-button');
+        const refreshClientsBtn = document.getElementById('refresh-clients');
+
+        const statusLight = document.getElementById('status-light');
+        const attackStatusDiv = document.getElementById('attack-status');
+        const clientCountSpan = document.getElementById('client-count');
+        const clientListPre = document.getElementById('client-list');
+        const attackFormEl = document.getElementById('attack-form');
+        const enableBtn = document.getElementById('enable-attacks');
+        const disableBtn = document.getElementById('disable-attacks');
+        const apiKeyInput = document.getElementById('api-key');
+        const activityLogDiv = document.getElementById('activity-log');
+        
+        let dataFetchInterval = null;
+
+        // Toast notification function
+        function showToast(message, type = 'info') {
+            const toastContainer = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            let bgColor, icon;
+            switch(type) {
+                case 'success':
+                    bgColor = 'bg-emerald-600';
+                    icon = 'fa-check-circle';
+                    break;
+                case 'error':
+                    bgColor = 'bg-red-600';
+                    icon = 'fa-exclamation-circle';
+                    break;
+                case 'warning':
+                    bgColor = 'bg-amber-500';
+                    icon = 'fa-exclamation-triangle';
+                    break;
+                default:
+                    bgColor = 'bg-primary-600';
+                    icon = 'fa-info-circle';
+            }
+            
+            toast.className = `${bgColor} text-white p-4 rounded-lg shadow-lg flex items-start max-w-md transform transition-all duration-300 opacity-0 translate-x-full`;
+            toast.innerHTML = `
+                <i class="fas ${icon} mr-3 mt-1"></i>
+                <div class="flex-1">${message}</div>
+                <button class="ml-4 text-white hover:text-slate-200 focus:outline-none">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            // Animate in
+            setTimeout(() => {
+                toast.classList.remove('opacity-0', 'translate-x-full');
+            }, 10);
+            
+            // Auto dismiss after 5 seconds
+            const dismissTimeout = setTimeout(() => {
+                dismissToast(toast);
+            }, 5000);
+            
+            // Close button
+            toast.querySelector('button').addEventListener('click', () => {
+                clearTimeout(dismissTimeout);
+                dismissToast(toast);
+            });
+            
+            function dismissToast(toastElement) {
+                toastElement.classList.add('opacity-0', 'translate-x-full');
+                setTimeout(() => {
+                    toastElement.remove();
+                }, 300);
+            }
+        }
+
+        // Add activity log entry
+        function addActivityLog(message, actor = 'System') {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString();
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = 'flex items-start';
+            logEntry.innerHTML = `
+                <div class="min-w-[80px] text-xs text-slate-500">${timeStr}</div>
+                <div class="flex-1">
+                    <span class="text-primary-400">${actor}</span>
+                    <span class="text-slate-300"> - ${message}</span>
+                </div>
+            `;
+            
+            activityLogDiv.prepend(logEntry);
+            
+            // Limit log entries to prevent overflow
+            const maxEntries = 50;
+            const entries = activityLogDiv.children;
+            if (entries.length > maxEntries) {
+                for (let i = maxEntries; i < entries.length; i++) {
+                    entries[i].remove();
+                }
+            }
+        }
+
+        // Функция для проверки ключа на сервере
+        async function validateAdminKey(key) {
+            if (!key) return false;
+            try {
+                // Пытаемся получить доступ к защищенному эндпоинту
+                const response = await fetch(`/status?api=${key}`);
+                return response.ok;
+            } catch (error) {
+                return false;
+            }
+        }
+
+        // Показывает админ-панель и запускает обновление данных
+        function showAdminPanel() {
+            loginScreen.classList.add('hidden');
+            adminPanel.classList.remove('hidden');
+            
+            // Запуск интервала обновления данных
+            if (dataFetchInterval) clearInterval(dataFetchInterval);
+            dataFetchInterval = setInterval(() => {
+                fetchStatus();
+                fetchClients();
+            }, 2000);
+            
+            addActivityLog('Admin logged in successfully');
+            showToast('Welcome to the Admin Dashboard', 'success');
+        }
+        
+        // Показывает экран входа
+        function showLoginScreen() {
+            adminPanel.classList.add('hidden');
+            loginScreen.classList.remove('hidden');
+            if (dataFetchInterval) clearInterval(dataFetchInterval);
+        }
+
+        // Обработка входа
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const key = adminKeyInput.value;
+            
+            // Show loading state
+            const submitBtn = loginForm.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i> Verifying...';
+            
+            const isValid = await validateAdminKey(key);
+
+            if (isValid) {
+                sessionStorage.setItem('adminKey', key);
+                apiKeyInput.value = key; // Автозаполнение ключа в форме атаки
+                showAdminPanel();
+            } else {
+                loginError.classList.remove('hidden');
+                setTimeout(() => loginError.classList.add('hidden'), 3000);
+            }
+            
+            // Restore button state
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+        });
+        
+        // Обработка выхода
+        logoutButton.addEventListener('click', () => {
+            sessionStorage.removeItem('adminKey');
+            addActivityLog('Admin logged out');
+            showToast('You have been logged out', 'info');
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        });
+
+        // Проверка при загрузке страницы, есть ли сохраненный ключ
+        (async () => {
+            const savedKey = sessionStorage.getItem('adminKey');
+            if (savedKey && await validateAdminKey(savedKey)) {
+                apiKeyInput.value = savedKey;
+                showAdminPanel();
+            } else {
+                showLoginScreen();
+            }
+        })();
+        
+        // --- Функции для работы с API (внутри админ-панели) ---
+
+        async function fetchStatus() {
+            const adminKey = sessionStorage.getItem('adminKey');
+            if (!adminKey) return;
+
+            try {
+                const response = await fetch(`/status?api=${adminKey}`);
+                const data = await response.json();
+
+                enableBtn.disabled = data.attacks_enabled;
+                disableBtn.disabled = !data.attacks_enabled;
+
+                if (data.active) {
+                    statusLight.classList.remove('bg-red-500');
+                    statusLight.classList.add('bg-emerald-400');
+                    attackStatusDiv.innerHTML = `
+                        <div class="bg-dark-850 border border-slate-700/50 p-4 rounded-lg">
+                            <div class="flex items-center text-emerald-400 mb-3">
+                                <i class="fas fa-satellite-dish mr-2"></i>
+                                <span class="font-semibold">Active Attack in Progress</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3 text-sm">
+                                <div class="flex items-center">
+                                    <i class="fas fa-crosshairs text-slate-400 mr-2 w-5 text-center"></i>
+                                    <span class="text-slate-400">Target:</span>
+                                    <span class="ml-2 text-primary-300 font-mono">${data.target}</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-network-wired text-slate-400 mr-2 w-5 text-center"></i>
+                                    <span class="text-slate-400">Port:</span>
+                                    <span class="ml-2 text-primary-300 font-mono">${data.port}</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-code-branch text-slate-400 mr-2 w-5 text-center"></i>
+                                    <span class="text-slate-400">Method:</span>
+                                    <span class="ml-2 text-primary-300 font-mono">${data.method}</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-clock text-slate-400 mr-2 w-5 text-center"></i>
+                                    <span class="text-slate-400">Time Left:</span>
+                                    <span class="ml-2 text-primary-300 font-mono">${data.remainingTime}</span>
+                                </div>
+                                <div class="flex items-center col-span-2">
+                                    <i class="fas fa-user-shield text-slate-400 mr-2 w-5 text-center"></i>
+                                    <span class="text-slate-400">Initiator:</span>
+                                    <span class="ml-2 text-amber-400 font-mono">${data.initiatedByIp}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    statusLight.classList.remove('bg-emerald-400');
+                    statusLight.classList.add('bg-red-500');
+                    attackStatusDiv.innerHTML = `
+                        <div class="bg-dark-850 border border-slate-700/50 p-4 rounded-lg">
+                            <div class="flex items-center text-slate-400 mb-2">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                <span>Status Information</span>
+                            </div>
+                            <p class="text-slate-300">No active attacks.</p>
+                            <p class="text-slate-400 mt-2 text-sm">System is ${data.attacks_enabled ? 
+                                '<span class="text-emerald-400">ENABLED</span>' : 
+                                '<span class="text-red-400">DISABLED</span>'}.
+                            </p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                attackStatusDiv.innerHTML = `
+                    <div class="bg-dark-850 border border-red-700/30 p-4 rounded-lg">
+                        <div class="flex items-center text-red-400">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            <span>API Connection Error</span>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        async function fetchClients() {
+            const apiKey = sessionStorage.getItem('adminKey'); // Используем админ-ключ для просмотра
+            if (!apiKey) return;
+
+            try {
+                const response = await fetch(`/users?api=${apiKey}`);
+                const data = await response.json();
+                clientCountSpan.textContent = data.total;
+                
+                if (data.total > 0) {
+                    // Format the client data for better display
+                    const formattedData = JSON.stringify(data.clients, null, 2)
+                        .replace(/"ip":/g, '"IP":')
+                        .replace(/"connectedAt":/g, '"Connected":')
+                        .replace(/"lastActivity":/g, '"Last Activity":');
+                    
+                    clientListPre.textContent = formattedData;
+                } else {
+                    clientListPre.innerHTML = '<span class="text-slate-500">No clients connected.</span>';
+                }
+            } catch (error) {
+                clientListPre.innerHTML = '<span class="text-red-400">API connection error.</span>';
+            }
+        }
+
+        // Manual refresh of client list
+        refreshClientsBtn.addEventListener('click', () => {
+            fetchClients();
+            showToast('Client list refreshed', 'info');
+        });
+
+        attackFormEl.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Show loading state
+            const submitBtn = attackFormEl.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i> Launching...';
+            
+            const params = new URLSearchParams({
+                api: document.getElementById('api-key').value,
+                ip: document.getElementById('ip').value,
+                port: document.getElementById('port').value,
+                threads: 1, // Поле убрано для упрощения, можно вернуть
+                method: document.getElementById('method').value,
+                duration: document.getElementById('duration').value
+            });
+
+            try {
+                const response = await fetch(`/attack?${params.toString()}`);
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showToast(result.message, 'success');
+                    addActivityLog(`Attack launched on ${params.get('ip')}:${params.get('port')} using ${params.get('method')}`, 'User');
+                } else {
+                    showToast(result.message || result.error, 'error');
+                }
+                
+                fetchStatus();
+            } catch (error) {
+                showToast('Failed to connect to API', 'error');
+            } finally {
+                // Restore button state
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+            }
+        });
+        
+        async function toggleAttackSystem(endpoint) {
+            const adminKey = sessionStorage.getItem('adminKey');
+            
+            try {
+                const response = await fetch(`${endpoint}?admin=${adminKey}`);
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showToast(result.message, 'success');
+                    addActivityLog(endpoint.includes('enable') ? 'Attack system enabled' : 'Attack system disabled');
+                } else {
+                    showToast(result.message, 'error');
+                }
+                
+                fetchStatus();
+            } catch (error) {
+                showToast('Failed to connect to API', 'error');
+            }
+        }
+
+        enableBtn.addEventListener('click', () => {
+            enableBtn.disabled = true;
+            enableBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i> Enabling...';
+            
+            toggleAttackSystem('/admin/attacks/enable').finally(() => {
+                enableBtn.innerHTML = '<i class="fas fa-play mr-2"></i> Enable';
+            });
+        });
+        
+        disableBtn.addEventListener('click', () => {
+            disableBtn.disabled = true;
+            disableBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i> Disabling...';
+            
+            toggleAttackSystem('/admin/attacks/disable').finally(() => {
+                disableBtn.innerHTML = '<i class="fas fa-stop mr-2"></i> Disable';
+            });
+        });
+        
+        // Add keyboard shortcut for quick actions
+        document.addEventListener('keydown', (e) => {
+            // Alt+R to refresh clients
+            if (e.altKey && e.key === 'r' && !loginScreen.classList.contains('hidden')) {
+                e.preventDefault();
+                fetchClients();
+                showToast('Client list refreshed', 'info');
+            }
+            
+            // Alt+S to check status
+            if (e.altKey && e.key === 's' && !loginScreen.classList.contains('hidden')) {
+                e.preventDefault();
+                fetchStatus();
+                showToast('Status refreshed', 'info');
+            }
+        });
+        
+        // Initialize tooltips for better UX
+        const tooltipElements = document.querySelectorAll('[data-tooltip]');
+        tooltipElements.forEach(el => {
+            const tooltipText = el.getAttribute('data-tooltip');
+            el.setAttribute('title', tooltipText);
+        });
+    });
+</script>
+
+<!-- Add a preloader for better UX -->
+<div id="preloader" class="fixed inset-0 bg-dark-950 z-50 flex items-center justify-center">
+    <div class="relative">
+        <div class="h-24 w-24 rounded-full border-t-4 border-b-4 border-primary-500 animate-spin"></div>
+        <div class="absolute inset-0 flex items-center justify-center">
+            <div class="h-16 w-16 rounded-full bg-dark-950"></div>
+        </div>
+        <div class="absolute inset-0 flex items-center justify-center">
+            <i class="fas fa-shield-alt text-primary-500 text-2xl"></i>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Hide preloader when page is loaded
+    window.addEventListener('load', () => {
+        const preloader = document.getElementById('preloader');
+        preloader.classList.add('opacity-0');
+        setTimeout(() => {
+            preloader.style.display = 'none';
+        }, 500);
+    });
+</script>
+</body>
+</html>
