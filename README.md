@@ -1,0 +1,2 @@
+# KrisNet
+Basic java botnet
