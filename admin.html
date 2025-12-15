@@ -94,7 +94,6 @@
 </head>
 <body class="bg-gradient-to-br from-dark-950 via-dark-900 to-dark-850 text-slate-300 min-h-screen">
 
-<!-- Login Screen -->
 <div id="login-screen" class="min-h-screen flex items-center justify-center p-4 bg-[url('https://images.unsplash.com/photo-1639322537228-f710d846310a?q=80&w=2000')] bg-cover bg-center">
     <div class="w-full max-w-md glass-effect p-8 rounded-2xl shadow-2xl border border-slate-700/30">
         <div class="flex justify-center mb-6">
@@ -127,7 +126,6 @@
     </div>
 </div>
 
-<!-- Admin Panel -->
 <div id="admin-panel" class="hidden transition-all duration-300">
     <header class="glass-effect border-b border-slate-700/30 p-4 shadow-lg sticky top-0 z-10">
         <div class="container mx-auto flex justify-between items-center">
@@ -146,7 +144,6 @@
     <main class="container mx-auto p-6">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-            <!-- Launch Attack Card -->
             <div class="bg-dark-900/70 border border-slate-700/30 p-6 rounded-xl shadow-xl card-hover">
                 <div class="flex items-center mb-4">
                     <div class="h-10 w-10 rounded-lg bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center shadow-lg mr-3">
@@ -214,7 +211,6 @@
                 </form>
             </div>
 
-            <!-- System Status Card -->
             <div class="bg-dark-900/70 border border-slate-700/30 p-6 rounded-xl shadow-xl card-hover">
                 <div class="flex items-center mb-4">
                     <div class="h-10 w-10 rounded-lg bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center shadow-lg mr-3">
@@ -251,7 +247,6 @@
                 </div>
             </div>
 
-            <!-- Connected Clients Card -->
             <div class="bg-dark-900/70 border border-slate-700/30 p-6 rounded-xl shadow-xl card-hover">
                 <div class="flex items-center mb-4">
                     <div class="h-10 w-10 rounded-lg bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center shadow-lg mr-3">
@@ -279,7 +274,6 @@
 
         </div>
         
-        <!-- Activity Log Section -->
         <div class="mt-6 bg-dark-900/70 border border-slate-700/30 p-6 rounded-xl shadow-xl card-hover">
             <div class="flex items-center mb-4">
                 <div class="h-10 w-10 rounded-lg bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center shadow-lg mr-3">
@@ -303,7 +297,6 @@
         </div>
     </main>
 
-    <!-- Footer -->
     <footer class="mt-8 py-6 border-t border-slate-800">
         <div class="container mx-auto px-6 text-center text-slate-500 text-sm">
             <p>Admin Dashboard © 2025 - Secure System</p>
@@ -311,7 +304,6 @@
     </footer>
 </div>
 
-<!-- Toast Notification System -->
 <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-md"></div>
 
 <script>
@@ -336,7 +328,6 @@
         
         let dataFetchInterval = null;
 
-        // Toast notification function
         function showToast(message, type = 'info') {
             const toastContainer = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -371,17 +362,14 @@
             
             toastContainer.appendChild(toast);
             
-            // Animate in
             setTimeout(() => {
                 toast.classList.remove('opacity-0', 'translate-x-full');
             }, 10);
             
-            // Auto dismiss after 5 seconds
             const dismissTimeout = setTimeout(() => {
                 dismissToast(toast);
             }, 5000);
             
-            // Close button
             toast.querySelector('button').addEventListener('click', () => {
                 clearTimeout(dismissTimeout);
                 dismissToast(toast);
@@ -395,7 +383,6 @@
             }
         }
 
-        // Add activity log entry
         function addActivityLog(message, actor = 'System') {
             const now = new Date();
             const timeStr = now.toLocaleTimeString();
@@ -412,7 +399,6 @@
             
             activityLogDiv.prepend(logEntry);
             
-            // Limit log entries to prevent overflow
             const maxEntries = 50;
             const entries = activityLogDiv.children;
             if (entries.length > maxEntries) {
@@ -422,11 +408,9 @@
             }
         }
 
-        // Функция для проверки ключа на сервере
         async function validateAdminKey(key) {
             if (!key) return false;
             try {
-                // Пытаемся получить доступ к защищенному эндпоинту
                 const response = await fetch(`/status?api=${key}`);
                 return response.ok;
             } catch (error) {
@@ -434,12 +418,10 @@
             }
         }
 
-        // Показывает админ-панель и запускает обновление данных
         function showAdminPanel() {
             loginScreen.classList.add('hidden');
             adminPanel.classList.remove('hidden');
             
-            // Запуск интервала обновления данных
             if (dataFetchInterval) clearInterval(dataFetchInterval);
             dataFetchInterval = setInterval(() => {
                 fetchStatus();
@@ -450,19 +432,16 @@
             showToast('Welcome to the Admin Dashboard', 'success');
         }
         
-        // Показывает экран входа
         function showLoginScreen() {
             adminPanel.classList.add('hidden');
             loginScreen.classList.remove('hidden');
             if (dataFetchInterval) clearInterval(dataFetchInterval);
         }
 
-        // Обработка входа
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const key = adminKeyInput.value;
             
-            // Show loading state
             const submitBtn = loginForm.querySelector('button[type="submit"]');
             const originalBtnText = submitBtn.innerHTML;
             submitBtn.disabled = true;
@@ -472,19 +451,17 @@
 
             if (isValid) {
                 sessionStorage.setItem('adminKey', key);
-                apiKeyInput.value = key; // Автозаполнение ключа в форме атаки
+                apiKeyInput.value = key; 
                 showAdminPanel();
             } else {
                 loginError.classList.remove('hidden');
                 setTimeout(() => loginError.classList.add('hidden'), 3000);
             }
             
-            // Restore button state
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalBtnText;
         });
         
-        // Обработка выхода
         logoutButton.addEventListener('click', () => {
             sessionStorage.removeItem('adminKey');
             addActivityLog('Admin logged out');
@@ -494,7 +471,6 @@
             }, 1000);
         });
 
-        // Проверка при загрузке страницы, есть ли сохраненный ключ
         (async () => {
             const savedKey = sessionStorage.getItem('adminKey');
             if (savedKey && await validateAdminKey(savedKey)) {
@@ -505,7 +481,6 @@
             }
         })();
         
-        // --- Функции для работы с API (внутри админ-панели) ---
 
         async function fetchStatus() {
             const adminKey = sessionStorage.getItem('adminKey');
@@ -586,7 +561,7 @@
         }
         
         async function fetchClients() {
-            const apiKey = sessionStorage.getItem('adminKey'); // Используем админ-ключ для просмотра
+            const apiKey = sessionStorage.getItem('adminKey'); 
             if (!apiKey) return;
 
             try {
@@ -595,7 +570,6 @@
                 clientCountSpan.textContent = data.total;
                 
                 if (data.total > 0) {
-                    // Format the client data for better display
                     const formattedData = JSON.stringify(data.clients, null, 2)
                         .replace(/"ip":/g, '"IP":')
                         .replace(/"connectedAt":/g, '"Connected":')
@@ -610,7 +584,6 @@
             }
         }
 
-        // Manual refresh of client list
         refreshClientsBtn.addEventListener('click', () => {
             fetchClients();
             showToast('Client list refreshed', 'info');
@@ -619,7 +592,6 @@
         attackFormEl.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            // Show loading state
             const submitBtn = attackFormEl.querySelector('button[type="submit"]');
             const originalBtnText = submitBtn.innerHTML;
             submitBtn.disabled = true;
@@ -629,7 +601,7 @@
                 api: document.getElementById('api-key').value,
                 ip: document.getElementById('ip').value,
                 port: document.getElementById('port').value,
-                threads: 1, // Поле убрано для упрощения, можно вернуть
+                threads: 1, 
                 method: document.getElementById('method').value,
                 duration: document.getElementById('duration').value
             });
@@ -649,7 +621,6 @@
             } catch (error) {
                 showToast('Failed to connect to API', 'error');
             } finally {
-                // Restore button state
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalBtnText;
             }
@@ -693,16 +664,13 @@
             });
         });
         
-        // Add keyboard shortcut for quick actions
         document.addEventListener('keydown', (e) => {
-            // Alt+R to refresh clients
             if (e.altKey && e.key === 'r' && !loginScreen.classList.contains('hidden')) {
                 e.preventDefault();
                 fetchClients();
                 showToast('Client list refreshed', 'info');
             }
             
-            // Alt+S to check status
             if (e.altKey && e.key === 's' && !loginScreen.classList.contains('hidden')) {
                 e.preventDefault();
                 fetchStatus();
@@ -710,7 +678,6 @@
             }
         });
         
-        // Initialize tooltips for better UX
         const tooltipElements = document.querySelectorAll('[data-tooltip]');
         tooltipElements.forEach(el => {
             const tooltipText = el.getAttribute('data-tooltip');
@@ -719,7 +686,6 @@
     });
 </script>
 
-<!-- Add a preloader for better UX -->
 <div id="preloader" class="fixed inset-0 bg-dark-950 z-50 flex items-center justify-center">
     <div class="relative">
         <div class="h-24 w-24 rounded-full border-t-4 border-b-4 border-primary-500 animate-spin"></div>
@@ -733,7 +699,6 @@
 </div>
 
 <script>
-    // Hide preloader when page is loaded
     window.addEventListener('load', () => {
         const preloader = document.getElementById('preloader');
         preloader.classList.add('opacity-0');
@@ -743,4 +708,5 @@
     });
 </script>
 </body>
+
 </html>
